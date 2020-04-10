@@ -10,12 +10,12 @@ import gettext
 from shoebot.data import _copy_attrs
 # from shoebot.data import Grob, ColorMixin, TransformMixin
 from shoebot.core.backend import cairo
-from grob import Grob
+from .grob import Grob
 from itertools import chain
-from basecolor import ColorMixin
+from .basecolor import ColorMixin
 from math import pi as _pi, sqrt
 
-import geometry
+from . import geometry
 
 CENTER = 'center'
 CORNER = 'corner'
@@ -56,7 +56,7 @@ class BezierPath(Grob, ColorMixin):
 
     _state_attributes = {'fillcolor', 'strokecolor', 'strokewidth', 'transform'}
 
-    def __init__(self, bot, path=None, fill=None, stroke=None, strokewidth=None, pathmode=CORNER, packed_elements=None):
+    def __init__(self, bot, path=None, fill=None, stroke=None, strokewidth=0, pathmode=CORNER, packed_elements=None):
         # Stores two lists, _elements and _render_funcs that are kept syncronized
         # _render_funcs contain functions that do the rendering
         # _elements contains either a PathElement or the arguments that need
@@ -353,7 +353,7 @@ class BezierPath(Grob, ColorMixin):
         if segments is None:
             segments = self._segment_lengths(relative=True)
         if len(segments) == 0:
-            raise PathError, "The given path is empty"
+            raise PathError("The given path is empty")
         for i, el in enumerate(self._get_elements()):
             if i == 0 or el.cmd == MOVETO:
                 closeto = Point(el.x, el.y)
@@ -422,7 +422,7 @@ class BezierPath(Grob, ColorMixin):
             # If amount=4, we want the point at t 0.0, 0.33, 0.66 and 1.0.
             # If amount=2, we want the point at t 0.0 and 1.0.
             d = float(n) / (amount - 1)
-        for i in xrange(int(amount)):
+        for i in range(int(amount)):
             yield self.point(start + d * i, segments)
 
     def _linepoint(self, t, x0, y0, x1, y1):
@@ -526,7 +526,7 @@ class BezierPath(Grob, ColorMixin):
             length = sum(lengths)
             try:
                 # Relative segment lengths' sum is 1.0.
-                return map(lambda l: l / length, lengths)
+                return [l / length for l in lengths]
             except ZeroDivisionError:
                 # If the length is zero, just return zero for all segments
                 return [0.0] * len(lengths)
@@ -577,7 +577,7 @@ class BezierPath(Grob, ColorMixin):
             return el
 
     def __iter__(self):
-        for index in xrange(len(self._elements)):
+        for index in range(len(self._elements)):
             yield self.__getitem__(index)
 
     def __len__(self):
@@ -708,6 +708,10 @@ class PathElement(object):
         data.insert(0, self.cmd)
         return data[key]
 
+    def __hash__(self):
+        # TODO - this has not been rigorously tested.
+        return hash((self.cmd, *self.values))
+
     def __repr__(self):
         data = list(self. values)
         data.insert(0, self.cmd)
@@ -755,7 +759,8 @@ class Point(object):
     def _get_xy(self):
         return (self.x, self.y)
 
-    def _set_xy(self, (x, y)):
+    def _set_xy(self, xxx_todo_changeme):
+        (x, y) = xxx_todo_changeme
         self.x = x
         self.y = y
 

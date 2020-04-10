@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -30,10 +30,12 @@
 '''Abstract canvas class'''
 
 from collections import deque
-from abc import ABCMeta, abstractproperty
+import abc, six
 import sys
 import locale
 import gettext
+from pathlib import Path
+
 from shoebot.core.drawqueue import DrawQueue
 
 APP = 'shoebot'
@@ -51,9 +53,8 @@ TOP_LEFT = 1
 BOTTOM_LEFT = 2
 
 
+@six.add_metaclass(abc.ABCMeta)
 class Canvas(object):
-    __metaclass__ = ABCMeta
-
     DEFAULT_SIZE = 400, 400
     DEFAULT_MODE = CENTER
 
@@ -90,11 +91,11 @@ class Canvas(object):
         '''
         pass
 
-    @abstractproperty
+    @abc.abstractproperty
     def reset_drawqueue(self):
         pass
 
-    @abstractproperty
+    @abc.abstractproperty
     def reset_transform(self):
         pass
 
@@ -107,7 +108,7 @@ class Canvas(object):
         '''
         Pass a load of settings into the canvas
         '''
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             setattr(self, k, v)
 
     def size_or_default(self):
@@ -145,6 +146,10 @@ class Canvas(object):
         else:
             return self.DEFAULT_SIZE[1]
 
+    def _filename_with_framenumber(self, basename, frame):
+        extension = Path(basename).suffix
+        return f'{basename}_{frame:04}.{extension}'
+
     def snapshot(self, target, defer=True, file_number=None):
         '''
         Ask the drawqueue to output to target.
@@ -154,7 +159,10 @@ class Canvas(object):
 
         If target is not supported then an exception is thrown.
         '''
-        output_func = self.output_closure(target, file_number)
+        if file_number is not None:
+            target = self._filename_with_framenumber(target, file_number)
+
+        output_func = self.output_closure(target)
         if defer:
             self._drawqueue.append(output_func)
         else:

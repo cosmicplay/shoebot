@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -84,7 +84,7 @@ class Text(Grob, ColorMixin):
 
         self._doRender = enableRendering
 
-        self.text = unicode(text)
+        self.text = str(text)
         self.x = x
         self.y = y
         self.width = width

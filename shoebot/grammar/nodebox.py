@@ -4,7 +4,7 @@ import sys
 from shoebot.core.backend import cairo
 from shoebot.kgp import KantGenerator
 from shoebot.data import ShoebotError
-from bot import Bot
+from .bot import Bot
 from shoebot.data import geometry, Point, BezierPath, Image, RGB, HSB, \
     CORNER, CENTER, \
     MOVETO, RMOVETO, LINETO, RLINETO, CURVETO, RCURVETO, ARC, ELLIPSE, \
@@ -13,7 +13,6 @@ from shoebot.data import geometry, Point, BezierPath, Image, RGB, HSB, \
 
 from math import sin, cos, pi
 from math import radians as deg2rad
-from types import TupleType
 from PIL import Image as PILImage
 
 import locale
@@ -361,7 +360,7 @@ class NodeBot(Bot):
         # as someone supplying a list of (x,y)-tuples.
 
         for i, pt in enumerate(points):
-            if type(pt) == TupleType:
+            if type(pt) == tuple:
                 points[i] = Point(pt[0], pt[1])
 
         if len(points) == 0:
@@ -399,7 +398,7 @@ class NodeBot(Bot):
             ax[i] = -(points[i + 1].x - points[i - 1].x - ax[i - 1]) * bi[i]
             ay[i] = -(points[i + 1].y - points[i - 1].y - ay[i - 1]) * bi[i]
 
-        r = range(1, len(points) - 1)
+        r = list(range(1, len(points) - 1))
         r.reverse()
         for i in r:
             dx[i] = ax[i] + dx[i + 1] * bi[i]

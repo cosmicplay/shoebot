@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Kant Generator for Python
 
 Generates mock philosophy based on a context-free grammar
@@ -43,7 +43,7 @@ def openAnything(source, searchpaths=None):
     and deal with it in a uniform manner.  Returned object is guaranteed
     to have all the basic stdio read methods (read, readline, readlines).
     Just .close() the object when you're done with it.
-    
+
     Examples:
     >>> from xml.dom import minidom
     >>> sock = openAnything("http://localhost/kant.xml")
@@ -59,18 +59,18 @@ def openAnything(source, searchpaths=None):
 
     if hasattr(source, "read"):
         return source
-    
+
     if source == "-":
         import sys
         return sys.stdin
 
     # try to open with urllib (if source is http, ftp, or file URL)
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
     try:
-        return urllib.urlopen(source)
+        return urllib.request.urlopen(source)
     except (IOError, OSError):
         pass
-    
+
     # try to open with native open function (if source is pathname)
     for path in searchpaths or ['.']:
         try:
@@ -80,14 +80,14 @@ def openAnything(source, searchpaths=None):
 
 
     # treat source as string
-    import StringIO
-    return StringIO.StringIO(str(source))
+    import io
+    return io.StringIO(str(source))
 
 class NoSourceError(Exception): pass
 
 class KantGenerator(object):
     """generates mock philosophy based on a context-free grammar"""
-    
+
     def __init__(self, grammar, source=None, searchpaths=None):
         self.loadGrammar(grammar, searchpaths=searchpaths)
         self.loadSource(source and source or self.getDefaultSource(), searchpaths=searchpaths)
@@ -114,14 +114,14 @@ class KantGenerator(object):
         self.refs = {}
         for ref in self.grammar.getElementsByTagName("ref"):
             self.refs[ref.attributes["id"].value] = ref
-        
+
     def loadSource(self, source, searchpaths=None):
         """load source"""
         self.source = self._load(source, searchpaths=searchpaths)
 
     def getDefaultSource(self):
         """guess default source of the current grammar
-        
+
         The default source will be one of the <ref>s that is not
         cross-referenced.  This sounds complicated but it's not.
         Example: The default source for kant.xml is
@@ -133,12 +133,12 @@ class KantGenerator(object):
         xrefs = {}
         for xref in self.grammar.getElementsByTagName("xref"):
             xrefs[xref.attributes["id"].value] = 1
-        xrefs = xrefs.keys()
-        standaloneXrefs = [e for e in self.refs.keys() if e not in xrefs]
+        xrefs = list(xrefs.keys())
+        standaloneXrefs = [e for e in list(self.refs.keys()) if e not in xrefs]
         if not standaloneXrefs:
-            raise NoSourceError, "can't guess source, and no source specified"
+            raise NoSourceError("can't guess source, and no source specified")
         return '<xref id="%s"/>' % random.choice(standaloneXrefs)
-        
+
     def reset(self):
         """reset parser"""
         self.pieces = []
@@ -146,7 +146,7 @@ class KantGenerator(object):
 
     def refresh(self):
         """reset output buffer, re-parse entire source file, and return output
-        
+
         Since parsing involves a good deal of randomness, this is an
         easy way to get new output without having to reload a grammar file
         each time.
@@ -161,7 +161,7 @@ class KantGenerator(object):
 
     def randomChildElement(self, node):
         """choose a random child element of a node
-        
+
         This is a utility method used by do_xref and do_choice.
         """
         choices = [e for e in node.childNodes
@@ -175,7 +175,7 @@ class KantGenerator(object):
 
     def parse(self, node):
         """parse a single XML node
-        
+
         A parsed XML document (from minidom.parse) is a tree of nodes
         of various types.  Each node is represented by an instance of the
         corresponding Python class (Element for a tag, Text for
@@ -189,7 +189,7 @@ class KantGenerator(object):
 
     def parse_Document(self, node):
         """parse the document node
-        
+
         The document node by itself isn't interesting (to us), but
         its only child, node.documentElement, is: it's the root node
         of the grammar.
@@ -198,7 +198,7 @@ class KantGenerator(object):
 
     def parse_Text(self, node):
         """parse a text node
-        
+
         The text of a text node is usually added to the output buffer
         verbatim.  The one exception is that <p class='sentence'> sets
         a flag to capitalize the first letter of the next word.  If
@@ -214,7 +214,7 @@ class KantGenerator(object):
 
     def parse_Element(self, node):
         """parse an element
-        
+
         An XML element corresponds to an actual tag in the source:
         <xref id='...'>, <p chance='...'>, <choice>, etc.
         Each element type is handled in its own method.  Like we did in
@@ -227,14 +227,14 @@ class KantGenerator(object):
 
     def parse_Comment(self, node):
         """parse a comment
-        
+
         The grammar can contain XML comments, but we ignore them
         """
         pass
-    
+
     def do_xref(self, node):
         """handle <xref id='...'> tag
-        
+
         An <xref id='...'> tag is a cross-reference to a <ref id='...'>
         tag.  <xref id='sentence'/> evaluates to a randomly chosen child of
         <ref id='sentence'>.
@@ -244,7 +244,7 @@ class KantGenerator(object):
 
     def do_p(self, node):
         """handle <p> tag
-        
+
         The <p> tag is the core of the grammar.  It can contain almost
         anything: freeform text, <choice> tags, <xref> tags, even other
         <p> tags.  If a "class='sentence'" attribute is found, a flag
@@ -253,7 +253,7 @@ class KantGenerator(object):
         evaluated (and therefore a (100-X)% chance that it will be
         completely ignored)
         """
-        keys = node.attributes.keys()
+        keys = list(node.attributes.keys())
         if "class" in keys:
             if node.attributes["class"].value == "sentence":
                 self.capitalizeNextWord = 1
@@ -267,14 +267,14 @@ class KantGenerator(object):
 
     def do_choice(self, node):
         """handle <choice> tag
-        
+
         A <choice> tag contains one or more <p> tags.  One <p> tag
         is chosen at random and evaluated; the rest are ignored.
         """
         self.parse(self.randomChildElement(node))
 
 def usage():
-    print __doc__
+    print(__doc__)
 
 def main(argv):
     grammar = "kant.xml"
@@ -292,10 +292,10 @@ def main(argv):
             _debug = 1
         elif opt in ("-g", "--grammar"):
             grammar = arg
-    
+
     source = "".join(args)
     k = KantGenerator(grammar, source)
-    print k.output()
+    print(k.output())
 
 if __name__ == "__main__":
     main(sys.argv[1:])

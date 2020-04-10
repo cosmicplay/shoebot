@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -63,7 +63,7 @@ def json_arg(s):
 def error(message):
     '''Prints an error message, the help message and quits'''
     global parser
-    print (_("Error: ") + message)
+    print((_("Error: ") + message))
     print ()
     parser.print_help()
     sys.exit()
@@ -71,7 +71,7 @@ def error(message):
 
 def warn(message):
     '''Print a warning message'''
-    print (_("Warning: ") + message)
+    print((_("Warning: ") + message))
 
 
 def main():
@@ -108,14 +108,16 @@ def main():
                        "--vars",
                        dest="vars",
                        default=False,
-                       help=_("Initial variables, in JSON (Note: Single quotes OUTSIDE, double INSIDE) --vars='{\"variable1\": 1}'"),
+                       help=_(
+                           "Initial variables, in JSON (Note: Single quotes OUTSIDE, double INSIDE) --vars='{\"variable1\": 1}'"),
                        )
     # IO - Namespace
     group.add_argument("-ns",
                     "--namespace",
                     dest="namespace",
                     default=None,
-                    help=_("Initial namespace, in JSON (Note: Single quotes OUTSIDE, double INSIDE) --namespace='{\"variable1\": 1}'"),
+                       help=_(
+                           "Initial namespace, in JSON (Note: Single quotes OUTSIDE, double INSIDE) --namespace='{\"variable1\": 1}'"),
                     )
     # IO - IDE integration Shell
     group.add_argument("-l",
@@ -154,8 +156,7 @@ def main():
                        "--window",
                        action="store_true",
                        dest="window",
-                       default=True,
-                       help=_("run script in a GTK window")
+                       help=_("Run script in a GTK window (default to True unless -o is used)")
                        )
     group.add_argument("-f",
                        "--fullscreen",
@@ -195,7 +196,7 @@ def main():
                        "--disable-background-thread",
                        action="store_true",
                        dest="disable_background_thread",
-                       default=sys.platform=='darwin',
+                       default=sys.platform == 'darwin',
                        help=_("disable running bot code in background thread (default on OSX)."))
     group.add_argument("-V",
                        "--verbose",
@@ -209,7 +210,7 @@ def main():
     args, extra = parser.parse_known_args()
 
     if args.diagnose:
-        from diagnose import diagnose
+        from .diagnose import diagnose
         diagnose()
         sys.exit()
 
@@ -226,12 +227,17 @@ def main():
     else:
         namespace = None
 
-    from __init__ import run  # https://github.com/shoebot/shoebot/issues/206
+    if args.window:
+        window = args.window
+    else:
+        window = not args.outputfile
+
+    from shoebot.__init__ import run  # https://github.com/shoebot/shoebot/issues/206
     run(src=args.script,
         grammar=args.grammar,
         outputfile=args.outputfile,
         iterations=args.repeat or None,
-        window=args.window or args.socketserver,
+        window=window,
         fullscreen=args.fullscreen,
         title=args.title,
         close_window=args.close,

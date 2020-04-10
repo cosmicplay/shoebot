@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -30,7 +30,7 @@
 import os
 
 from .backend import cairo
-from drawqueue_sink import DrawQueueSink
+from .drawqueue_sink import DrawQueueSink
 
 
 class CairoImageSink(DrawQueueSink):
@@ -73,7 +73,8 @@ class CairoImageSink(DrawQueueSink):
         if self.buff:
             return self.buff
         elif self.multifile:
-            return self.file_root + "_%03d" % frame + self.file_ext
+            file_root, file_ext = os.path.splitext(self.filename)
+            return file_root + "_%03d" % frame + file_ext
         else:
             return self.filename
 

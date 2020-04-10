@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2009 the Shoebot authors
@@ -27,9 +27,8 @@
 #   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 #   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 #   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''Assorted utility functions, mainly for color and font handling'''
+"""Assorted utility functions, mainly for color and font handling"""
 
-from __future__ import division
 
 '''
 def rgb_to_hsl(r, g, b):
@@ -110,7 +109,7 @@ def hsl_to_rgb (h, s, l):
     return rgb
 '''
 
-'''
+"""
 def rgb_to_hsv(r, g, b):
 
     h = s = 0
@@ -126,11 +125,11 @@ def rgb_to_hsv(r, g, b):
         else        : h = 4 + (r-g) / d
 
     h = h * (60.0/360)
-    if h < 0: 
+    if h < 0:
         h = h + 1.0
-    hsv=[h,s,v]    
+    hsv=[h,s,v]
     return hsv
-'''
+"""
 
 """def hsv_to_rgb(h, s, v):
 
@@ -170,11 +169,11 @@ def rgb_to_hsv(r, g, b):
 
 
 class flushfile(object):
-    '''
+    """
     Wrapper for file that flushes - used to flush stdout
 
     http://stackoverflow.com/questions/230751/how-to-flush-output-of-python-print
-    '''
+    """
 
     def __init__(self, fd):
         self.fd = fd

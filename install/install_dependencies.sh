@@ -1,28 +1,20 @@
 #!/bin/bash
 
 # Linux
-REDHAT_PACKAGES="redhat-rpm-config gcc cairo-devel libjpeg-devel pycairo python2-devel python2-gobject cairo-gobject python2-pillow"
+REDHAT_PACKAGES="redhat-rpm-config gcc cairo-devel libjpeg-devel python3-devel python3-gobject cairo-gobject"
 # Fedora == Redhat, these are not detected separately.
 
-SUSE_PACKAGES="gcc libjpeg62-devel python-pycairo python2-gobject python2-gobject-cairo python2-Pillow"
+SUSE_PACKAGES="gcc libjpeg62-devel python-gobject python-gobject-cairo"
 
-DEB_PACKAGES="build-essential libjpeg-dev python-cairo python2.7-dev python-gi-cairo python-gobject gir1.2-rsvg-2.0"
+DEB_PACKAGES="build-essential libjpeg-dev python3-dev python-gi-cairo python-gobject gir1.2-rsvg-2.0"
 DEBIAN_PACKAGES=${DEB_PACKAGES}
 UBUNTU_PACKAGES=${DEB_PACKAGES}
 MINT_PACKAGES=${DEB_PACKAGES}
 
 
 # OSX
-HOMEBREW_PACKAGES="gtk+3 pygobject jpeg librsvg libffi cairo py2cairo gobject-introspection gtksourceview3"
-MACPORTS_PACKAGES="gtk3 cairo cairo-devel gobject-introspection py27-gobject jpeg librsvg"
-
-confirm() {
-    read -p "Y/N" -n 1 -r
-    echo     #
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-}
+HOMEBREW_PACKAGES="gtk+3 pygobject3 gobject-introspection jpeg librsvg libffi cairo py3cairo gtksourceview3"
+MACPORTS_PACKAGES="gtk3 py37-gobject gobject-introspection jpeg librsvg cairo cairo-devel py37-cairo gtksourceview3"
 
 deb_install() {
     sudo apt-get install -y $*
@@ -57,25 +49,36 @@ install_darwin() {
     command -v port > /dev/null
     MACPORTS=$?
 
-    command -v brew
-    HOMEBREW=$? > /dev/null
-
-    echo 'Install on OSX...'
-    echo brew ${HOMEBREW}
-    echo port ${MACPORTS}
+    command -v brew > /dev/null
+    HOMEBREW=$?
+    
+    if [ "${HOMEBREW},${MACPORTS}" = "1,1" ]; then
+        echo "Install homebrew and re-run this script"
+    fi
+    if [ "${HOMEBREW},${MACPORTS}" = "0,0" ]; then
+        echo "Choose environment to install shoebot and depencencies:"
+        echo "1. Homebrew [recommneded]"
+        echo "2. Macports [unsupported]"
+        echo "3. Exit"
+        read -p ": " macenv
+        if [ "$macenv" = "1" ]; then
+          unset MACPORTS
+        elif [ "$macenv" = "2" ]; then
+          unset HOMEBREW
+        else
+          exit 1
+        fi
+    fi
+        
 
     if [ "${HOMEBREW}" = "0" ]; then
-        echo Install using homebrew ?
-        confirm
-        #source ${DIR}/OSX/homebrew/install_dependencies.sh
+        echo "Installing Shoebot dependencies on MacOSX Homebrew"
         brew install $HOMEBREW_PACKAGES
     fi
 
     if [ "${MACPORTS}" = "0" ]; then
-        echo Install using macports ?
-        echo - Warning - sets the default python to python27 - !
-        confirm
-        sudo port install python27 py27-pip py27-virtualenv
+        echo "Installing Shoebot dependencies on MacOSX macports"
+        echo "This is unsupported, let us know if it works"                              
         sudo port install $MACPORTS_PACKAGES
     fi
     hash -r

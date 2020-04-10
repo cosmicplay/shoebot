@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -100,18 +100,18 @@ def create_canvas(src, format=None, outputfile=None, multifile=False, buff=None,
 
     Output to a filename (or files if multifile is set), or a buffer object.
     """
-    from core import CairoCanvas, CairoImageSink # https://github.com/shoebot/shoebot/issues/206
+    from shoebot.core import CairoCanvas, CairoImageSink  # https://github.com/shoebot/shoebot/issues/206
 
-    if outputfile:
-        sink = CairoImageSink(outputfile, format, multifile, buff)
-    elif window or show_vars:
-        from gui import ShoebotWindow
+    if window or show_vars:
+        from shoebot.gui import ShoebotWindow
         if not title:
             if src and os.path.isfile(src):
                 title = os.path.splitext(os.path.basename(src))[0] + ' - Shoebot'
             else:
                 title = 'Untitled - Shoebot'
-        sink = ShoebotWindow(title, show_vars, fullscreen=fullscreen)
+        sink = ShoebotWindow(title, show_vars, fullscreen=fullscreen, outputfile=outputfile)
+    elif outputfile:
+        sink = CairoImageSink(outputfile, format, multifile, buff)
     else:
         if src and isinstance(src, cairo.Surface):
             outputfile = src
@@ -141,7 +141,15 @@ def create_bot(src=None, grammar=NODEBOX, format=None, outputfile=None, iteratio
     See create_canvas for details on those parameters.
 
     """
-    canvas = create_canvas(src, format, outputfile, iterations > 1, buff, window, title, fullscreen=fullscreen,
+    multifile = True if iterations and iterations > 1 else False
+    canvas = create_canvas(src=src,
+                           format=format,
+                           outputfile=outputfile,
+                           multifile=multifile,
+                           buff=buff,
+                           window=window,
+                           title=title,
+                           fullscreen=fullscreen,
                            show_vars=show_vars)
 
     if grammar == DRAWBOT:

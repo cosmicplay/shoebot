@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # This file is part of Shoebot.
 # Copyright (C) 2007-2009 the Shoebot authors
@@ -44,7 +44,7 @@ from shoebot.data import BezierPath, EndClip, Color, Text, Variable, \
                          RGB, HSB, \
                          CENTER, CORNER, CORNERS
 
-from grammar import Grammar
+from .grammar import Grammar
 
 from pkg_resources import resource_filename, Requirement
 from glob import glob
@@ -126,7 +126,7 @@ class Bot(Grammar):
 
         if self._input_device:
             # Get constants like KEY_DOWN, KEY_LEFT
-            for key_name, value in self._input_device.get_key_map().items():
+            for key_name, value in list(self._input_device.get_key_map().items()):
                 self._namespace[key_name] = value
                 setattr(self, key_name, value)
 
@@ -302,8 +302,8 @@ class Bot(Grammar):
         """
         # Taken ipsis verbis from Nodebox
         from random import shuffle
-        rowRange = range(int(rows))
-        colRange = range(int(cols))
+        rowRange = list(range(int(rows)))
+        colRange = list(range(int(cols)))
         if (shuffled):
             shuffle(rowRange)
             shuffle(colRange)
@@ -336,7 +336,7 @@ class Bot(Grammar):
         if isinstance(target, cairo.Surface):
             # snapshot to Cairo surface
             if defer is None:
-                self._canvas.snapshot(surface, defer)
+                self._canvas.snapshot(target, defer)
                 defer = False
             ctx = cairo.Context(target)
             # this used to be self._canvas.snapshot, but I couldn't make it work.

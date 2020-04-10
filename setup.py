@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # Shoebot setup script
 #
@@ -27,6 +27,9 @@ info = textwrap.dedent(
     command line.
 """
 )
+
+if sys.version_info < (3, 4):
+    sys.exit("Shoebot requires python 3.4 or higher.")
 
 # the following libraries will not be installed
 EXCLUDE_LIBS = ["lib/sbopencv", "lib/sbopencv/blobs"]
@@ -117,15 +120,15 @@ datafiles.extend(
     ]
 )
 
-PYCAIRO = "pycairo>=1.17.0"
-PYGOBJECT = "pygobject>=3.32"
+PYCAIRO = "pycairo>=1.18.1"
+PYGOBJECT = "pygobject>=3.32.1"
 # Also requires one of 'vext.gi' or 'pgi' to run in GUI
 BASE_REQUIREMENTS = [
     "setuptools>=18.8",
     PYCAIRO,
     "meta==1.0.2",
-    "Pillow>=2.8.1",
-    "pubsub==0.1.1",
+    "Pillow>=6.0.0",
+    "pubsub==0.1.2",
 ]
 
 
@@ -175,6 +178,7 @@ setup(
         debug="install" in sys.argv,
         with_pgi=os.environ.get("SHOEBOT_GI", False) == "pgi",
     ),
+    tests_require=["parameterized"],
     entry_points={
         "console_scripts": ["sbot=shoebot.run:main", "shoebot=shoebot.ide.ide:main"],
         "gui_scripts": "shoebot=shoebot.ide.ide:main",
